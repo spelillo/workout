@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Workout - Exercise Plan Generator</title>
+    <link rel="stylesheet" href="jwstyle.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { text-align: center; color: #2d3a4b; }
+        label { font-weight: bold; margin-top: 16px; display: block; }
+        select, button { width: 100%; padding: 10px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid #ccc; }
+        button { background: #2d3a4b; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #1a2230; }
+        .plan { background: #f0f4f8; border-radius: 8px; padding: 18px; margin-top: 20px; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div id="userHeader" style="display:none;"></div>
+    <div class="container" id="mainContainer" style="display:none;">
+        <h1>Just Workout</h1>
+        <div id="step1">
+            <label for="workoutType">Choose your workout:</label>
+            <select id="workoutType">
+                <option value="" disabled selected>Select...</option>
+                <option value="weightlifting">Weightlifting</option>
+                <option value="cardio">Cardio and Conditioning</option>
+                <option value="functional">Functional</option>
+            </select>
+        </div>
+        <div id="step2" style="display:none;"></div>
+        <div id="step3" style="display:none;"></div>
+        <div id="plan" class="plan" style="display:none;"></div>
+    </div>
+    <!-- Login/Signup Modal -->
+    <div id="loginModal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);align-items:center;justify-content:center;">
+      <div style="background:#fff;max-width:360px;width:90vw;margin:auto;border-radius:12px;box-shadow:0 4px 24px #0003;padding:0;position:relative;display:flex;flex-direction:column;align-items:stretch;">
+        <div style="display:flex;">
+          <button id="showLoginCard" style="flex:1;background:#223a5f;color:#fff;border:none;padding:16px 0;font-weight:bold;border-radius:12px 0 0 0;cursor:pointer;">Log In</button>
+          <button id="showSignupCard" style="flex:1;background:#f0f4f8;color:#223a5f;border:none;padding:16px 0;font-weight:bold;border-radius:0 12px 0 0;cursor:pointer;">Sign Up</button>
+        </div>
+        <!-- Login Card -->
+        <div id="loginCard" style="padding:24px;display:block;">
+          <h2 style="margin-top:0;text-align:center;color:#223a5f;">Log In</h2>
+          <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input id="loginUsername" name="username" type="text" style="width:100%;padding:10px;margin:10px 0 12px 0;border-radius:5px;border:1px solid #ccc;">
+            <label for="loginPassword">Password:</label>
+            <input id="loginPassword" name="password" type="password" style="width:100%;padding:10px;margin:10px 0 20px 0;border-radius:5px;border:1px solid #ccc;">
+            <button type="submit" style="width:100%;background:#223a5f;color:#fff;font-weight:bold;padding:10px;border:none;border-radius:5px;font-size:1.1em;">Log In</button>
+          </form>
+        </div>
+        <!-- Signup Card -->
+        <div id="signupCard" style="padding:24px;display:none;">
+          <h2 style="margin-top:0;text-align:center;color:#223a5f;">Sign Up</h2>
+          <form id="signupForm">
+            <label for="signupEmail">Email:</label>
+            <input id="signupEmail" name="email" type="email" style="width:100%;padding:10px;margin:10px 0 12px 0;border-radius:5px;border:1px solid #ccc;">
+            <label for="signupUsername">Username:</label>
+            <input id="signupUsername" name="username" type="text" style="width:100%;padding:10px;margin:10px 0 12px 0;border-radius:5px;border:1px solid #ccc;">
+            <label for="signupPassword">Password:</label>
+            <input id="signupPassword" name="password" type="password" style="width:100%;padding:10px;margin:10px 0 20px 0;border-radius:5px;border:1px solid #ccc;">
+            <button type="submit" style="width:100%;background:#223a5f;color:#fff;font-weight:bold;padding:10px;border:none;border-radius:5px;font-size:1.1em;">Sign Up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Tab switching logic
+      const showLoginCard = document.getElementById('showLoginCard');
+      const showSignupCard = document.getElementById('showSignupCard');
+      const loginCard = document.getElementById('loginCard');
+      const signupCard = document.getElementById('signupCard');
+
+      showLoginCard.onclick = function() {
+        loginCard.style.display = 'block';
+        signupCard.style.display = 'none';
+        showLoginCard.style.background = '#223a5f';
+        showLoginCard.style.color = '#fff';
+        showSignupCard.style.background = '#f0f4f8';
+        showSignupCard.style.color = '#223a5f';
+      };
+      showSignupCard.onclick = function() {
+        loginCard.style.display = 'none';
+        signupCard.style.display = 'block';
+        showSignupCard.style.background = '#223a5f';
+        showSignupCard.style.color = '#fff';
+        showLoginCard.style.background = '#f0f4f8';
+        showLoginCard.style.color = '#223a5f';
+      };
+
+      
+    </script>
+    <!-- Modal for workout plan -->
+    <div id="planModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);align-items:center;justify-content:center;">
+      <div id="planModalInner" style="background:#fff;max-width:420px;width:90vw;margin:auto;border-radius:12px;box-shadow:0 4px 24px #0003;padding:32px 24px 24px 24px;position:relative;">
+        <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:8px;">
+          <button id="closeModalBtn" aria-label="Close" style="background:none;border:none;font-size:1.7em;color:#888;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <div id="modalPlanContent"></div>
+        <div id="modalPlanActions" style="display:flex;gap:16px;justify-content:flex-end;margin-top:24px;">
+          <button id="cancelModalBtn" style="background:#888;color:#fff;">Cancel</button>
+          <button id="okModalBtn" style="background:#2ecc40;color:#fff;font-weight:bold;">Looks Good!</button>
+        </div>
+      </div>
+    </div>
+    <script src="jw.js"></script>
+</body>
+</html>

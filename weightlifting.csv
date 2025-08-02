@@ -1,0 +1,77 @@
+Type,Muscle Group,Exercise
+Push,Chest,Push-Ups
+Push,Chest,Dumbbell Bench Press
+Push,Chest,Barbell Bench Press
+Push,Chest,Incline Dumbbell Press
+Push,Chest,Machine Chest Press
+Push,Chest,Cable Chest Flyes
+Push,Chest,Pec Deck Machine (Chest Flyes)
+Push,Shoulders,Overhead Shoulder Press (DB or Barbell)
+Push,Shoulders,Arnold Press
+Push,Shoulders,Lateral Raises
+Push,Shoulders,Seated Dumbbell Shoulder Press
+Push,Triceps,Dips (Bench or Machine)
+Push,Triceps,Close-Grip Push-Ups
+Push,Triceps,Overhead Tricep Extension (DB or Cable)
+Push,Triceps,Skull Crushers (EZ Bar or DB)
+Pull,Back,Lat Pulldown
+Pull,Back,Assisted Pull-Ups
+Pull,Back,Dumbbell Rows
+Pull,Back,Barbell Rows
+Pull,Back,Seated Cable Row
+Pull,Back,Inverted Rows
+Pull,Back,Pull-Up (Unassisted)
+Pull,Back,Cable Straight-Arm Pulldown
+Pull,Back,T-Bar Row
+Pull,Back,Single-Arm Cable Row
+Pull,Rear Shoulders,Face Pulls
+Pull,Biceps,Hammer Curls
+Pull,Biceps,Barbell Curls
+Pull,Biceps,Preacher Curls
+Pull,Biceps,Concentration Curls
+Pull,Biceps,Incline DB Curls
+Legs,Quads,Bodyweight Squats
+Legs,Quads,Goblet Squats
+Legs,Quads,Barbell Back Squat
+Legs,Quads,Leg Press Machine
+Legs,Quads,Leg Extensions (Machine)
+Legs,Quads,Step-Ups
+Legs,Quads,Bulgarian Split Squat
+Legs,Hamstrings,Dumbbell Lunges
+Legs,Hamstrings,Walking Lunges
+Legs,Hamstrings,Romanian Deadlifts
+Legs,Hamstrings,Leg Curls (Machine)
+Legs,Glutes,Glute Bridges
+Legs,Glutes,Hip Thrusts
+Legs,Glutes,Sumo Squats
+Legs,Calves,Calf Raises (Standing or Seated)
+Arms,Triceps,Overhead Tricep Extension (DB or Cable)
+Arms,Triceps,Skull Crushers (EZ Bar or DB)
+Arms,Triceps,Tricep Pushdowns
+Arms,Biceps,Barbell Curls
+Arms,Biceps,Incline DB Curls
+Arms,Biceps,Hammer Curls
+Arms,Biceps,Preacher Curls
+Arms,Biceps,Concentration Curls
+Arms,Triceps,Dips (Bench or Machine)
+Arms,Triceps,Close-Grip Push-Ups
+Chest,Chest,Push-Ups
+Chest,Chest,Incline Push-Ups
+Chest,Chest,Dumbbell Bench Press
+Chest,Chest,Barbell Bench Press
+Chest,Chest,Machine Chest Press
+Chest,Chest,Incline Machine Press
+Chest,Chest,Cable Chest Flyes
+Chest,Chest,Low to High Cable Flyes
+Chest,Chest,Pec Deck Machine (Chest Flyes)
+Chest,Chest,Single-Arm Cable Chest Press
+Back,Back,Barbell Bent-Over Rows
+Back,Back,Dumbbell Rows
+Back,Back,Lat Pulldown
+Back,Back,Pull-Up (Unassisted)
+Back,Back,Seated Cable Row
+Back,Back,T-Bar Row
+Back,Back,Machine Row (Hammer Strength)
+Back,Back,Assisted Pull-Ups
+Back,Back,Inverted Rows
+Back,Rear Shoulders,Reverse Flyes
