@@ -43,7 +43,7 @@ function renderUserHeader() {
   };
   document.getElementById('menuViewHistory').onclick = () => {
     dd.style.display = 'none';
-    showHistoryModal();
+    window.open('workouthistory.html', '_blank');
   };
 // --- Workout History Modal ---
 function getUserHistory() {
@@ -85,19 +85,77 @@ function showHistoryModal() {
   const detailDiv = modal.querySelector('#historyDetail');
   detailDiv.style.display = 'none';
   listDiv.style.display = '';
+  // Header and summary visuals
+  let username = currentUser || localStorage.getItem('jw_currentUser') || 'Guest';
+  let headerHtml = `<div style='font-size:1.2em;font-weight:bold;margin-bottom:8px;text-align:center;'>Workouts for '<span style="color:#2ecc40;">${username}</span>'</div>`;
+  // Calculate total workouts and total time
+  let totalWorkouts = history.length;
+  let totalMs = 0;
+  history.forEach(w => {
+    // Parse totalTime (format mm:ss or hh:mm:ss)
+    if (w.totalTime) {
+      let parts = w.totalTime.split(':').map(Number);
+      let ms = 0;
+      if (parts.length === 2) {
+        ms = (parts[0] * 60 + parts[1]) * 1000;
+      } else if (parts.length === 3) {
+        ms = (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000;
+      }
+      totalMs += ms;
+    }
+  });
+  // Format totalMs as days, hours, minutes, seconds
+  function formatDuration(ms) {
+    let sec = Math.floor(ms / 1000);
+    let days = Math.floor(sec / 86400);
+    sec = sec % 86400;
+    let hours = Math.floor(sec / 3600);
+    sec = sec % 3600;
+    let min = Math.floor(sec / 60);
+    sec = sec % 60;
+    let out = [];
+    if (days) out.push(days + 'd');
+    if (hours) out.push(hours + 'h');
+    if (min) out.push(min + 'm');
+    out.push(sec + 's');
+    return out.join(' ');
+  }
+  let summaryHtml = `<div style='font-size:1.05em;margin-bottom:16px;text-align:center;'>
+    <b>Total Workouts:</b> ${totalWorkouts} &nbsp; | &nbsp; <b>Total Time Spent:</b> ${formatDuration(totalMs)}
+  </div>`;
   if (!history.length) {
-    listDiv.innerHTML = `<div style='color:#888;text-align:center;margin:32px 0;'>No workouts found.</div>`;
+    listDiv.innerHTML = headerHtml + summaryHtml + `<div style='color:#888;text-align:center;margin:32px 0;'>No workouts found.</div>`;
   } else {
-    listDiv.innerHTML = `<ul style='list-style:none;padding:0;margin:0;'>${history.map((w, i) => `
-      <li style='padding:12px 0;border-bottom:1px solid #eee;cursor:pointer;' data-idx='${i}'>
-        <div style='font-weight:bold;color:#223a5f;'>${w.date ? new Date(w.date).toLocaleString() : 'Unknown Date'}</div>
-        <div style='font-size:0.98em;color:#555;'>${w.exercises.length} exercises, ${w.totalSets} sets, ${w.totalReps} reps</div>
-      </li>`).join('')}</ul>`;
-    // Click handler for each workout
-    listDiv.querySelectorAll('li[data-idx]').forEach(li => {
-      li.onclick = function() {
+    listDiv.innerHTML = headerHtml + summaryHtml + `
+      <table style='width:100%;border-collapse:collapse;'>
+        <thead>
+          <tr>
+            <th style='text-align:left;background:#f0f4f8;'>Session ID</th>
+            <th style='text-align:left;background:#f0f4f8;'>Date</th>
+            <th style='text-align:left;background:#f0f4f8;'>Exercises</th>
+            <th style='text-align:left;background:#f0f4f8;'>Sets</th>
+            <th style='text-align:left;background:#f0f4f8;'>Reps</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${history.map((w, i) => `
+            <tr>
+              <td style='color:#2980b9;cursor:pointer;text-decoration:underline;' data-idx='${i}' class='session-id-link'>${w.sessionId || (i+1)}</td>
+              <td>${w.date ? new Date(w.date).toLocaleString() : 'Unknown Date'}</td>
+              <td>${w.exercises.length}</td>
+              <td>${w.totalSets}</td>
+              <td>${w.totalReps}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    // Click handler for each session ID
+    listDiv.querySelectorAll('.session-id-link').forEach(td => {
+      td.onclick = function(e) {
         const idx = +this.getAttribute('data-idx');
         showHistoryDetail(history[idx], () => showHistoryModal());
+        e.stopPropagation();
       };
     });
   }
@@ -135,8 +193,14 @@ function showHistoryDetail(workout, backFn) {
     </table>
   `;
   detailDiv.querySelector('#backToListBtn').onclick = function() {
-    detailDiv.style.display = 'none';
-    listDiv.style.display = '';
+    // Close the modal and show the main workout page (after login)
+    const modal = document.getElementById('historyModal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+    const main = document.getElementById('mainContainer');
+    if (main) main.style.display = '';
+    // Optionally, re-render user header if needed
+    if (typeof renderUserHeader === 'function') renderUserHeader();
   };
 }
   document.getElementById('menuLogout').onclick = () => {
@@ -147,8 +211,18 @@ function showHistoryDetail(workout, backFn) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Show login modal on load
-  showLoginModal();
+  // Check for skip-login flag
+  if (localStorage.getItem('jw_skipLoginOnce') === '1' && localStorage.getItem('jw_currentUser')) {
+    localStorage.removeItem('jw_skipLoginOnce');
+    currentUser = localStorage.getItem('jw_currentUser');
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('mainContainer').style.display = '';
+    renderUserHeader();
+    // Do not show login modal
+  } else {
+    // Show login modal on load
+    showLoginModal();
+  }
   // Login form handler
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
@@ -160,6 +234,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       if (!username) username = 'Guest';
       currentUser = username;
+      localStorage.setItem('jw_currentUser', username);
       hideLoginModal();
       renderUserHeader();
     };
@@ -175,6 +250,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       if (!username) username = 'Guest';
       currentUser = username;
+      localStorage.setItem('jw_currentUser', username);
       hideLoginModal();
       renderUserHeader();
     };
@@ -509,8 +585,13 @@ function generatePlan() {
         let timerInterval = null;
         let paused = false;
         const n = modalExercises.length;
-        // Store user actuals
-        let actuals = Array(n).fill().map(() => ({sets: '', reps: '', weight: ''}));
+        // Store user targets and actuals persistently
+        let targetInputs = Array(n).fill().map((_, idx) => ({
+          sets: document.querySelector(`[name=sets${idx}]`)?.value || '',
+          reps: document.querySelector(`[name=reps${idx}]`)?.value || '',
+          weight: document.querySelector(`[name=weight${idx}]`)?.value || ''
+        }));
+        let actualInputs = Array(n).fill().map(() => ({sets: '', reps: '', weight: ''}));
 
         function formatTime(ms) {
           const t = Math.floor(ms / 1000);
@@ -519,9 +600,75 @@ function generatePlan() {
           return `${min}:${sec}`;
         }
 
-        function renderSession() {
+        function renderSession(focusInfo) {
+function renderSession() {
+// ...existing code...
+
+// Persistent storage for target and actual values during workout session
+let targetInputs = [];
+let actualInputs = [];
+
+// Example renderSession function (update your actual renderSession accordingly):
+function renderSession() {
+  // ...existing code to set up modal...
+  // For each exercise, render input fields for target and actual values
+  // Use targetInputs[idx] and actualInputs[idx] for values
+  // On input, update targetInputs/actualInputs, not just the DOM
+  exercises.forEach((exercise, idx) => {
+    // When rendering, use:
+    // value="${targetInputs[idx]?.sets || ''}"
+    // value="${actualInputs[idx]?.sets || ''}"
+    // On input: targetInputs[idx].sets = e.target.value
+    //           actualInputs[idx].sets = e.target.value
+  });
+  // ...rest of modal rendering...
+}
+
+// When starting a workout session, initialize targetInputs and actualInputs
+function startWorkoutSession(exercises) {
+  targetInputs = exercises.map(e => ({
+    sets: e.targetSets || '',
+    reps: e.targetReps || '',
+    weight: e.targetWeight || ''
+  }));
+  actualInputs = exercises.map(e => ({
+    sets: e.actualSets || '',
+    reps: e.actualReps || '',
+    weight: e.actualWeight || ''
+  }));
+  renderSession();
+}
+
+// When saving the workout, use targetInputs and actualInputs to build the session data
+function saveWorkoutSession(exercises) {
+  const sessionExercises = exercises.map((e, idx) => ({
+    name: e.name,
+    targetSets: targetInputs[idx]?.sets,
+    targetReps: targetInputs[idx]?.reps,
+    targetWeight: targetInputs[idx]?.weight,
+    actualSets: actualInputs[idx]?.sets,
+    actualReps: actualInputs[idx]?.reps,
+    actualWeight: actualInputs[idx]?.weight
+  }));
+  // ...save sessionExercises to history...
+}
+  modal.innerHTML = `
+    <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;'>
+      <span style='font-size:1.3em;font-weight:bold;'>Workout In Progress</span>
+      <div style='margin-left:auto; display:flex; align-items:center; gap:10px;'>
+        <span id='minimizeBar' style='font-size:1.5em;cursor:pointer;'>_</span>
+        <span id='closeModalBtn' style='font-size:2em;cursor:pointer;'>&times;</span>
+      </div>
+    </div>
+    <!-- rest of modal content -->
+  `;
+  // ...existing code...
+}
           document.getElementById('modalPlanContent').innerHTML = `
-            <h3 style='margin-top:0;'>Workout In Progress</h3>
+            <div style='display:flex;justify-content:space-between;align-items:center;'>
+              <h3 style='margin-top:0;'>Workout In Progress</h3>
+              <button id='minimizeWorkoutBtn' title='Minimize' style='background:none;border:none;font-size:1.5em;color:#888;cursor:pointer;line-height:1;'>&#8211;</button>
+            </div>
             <div style='font-size:1.3em;font-weight:bold;margin-bottom:18px;'>⏱️ <span id='workoutTimer'>${formatTime(elapsed)}</span></div>
             <table style='width:100%;border-collapse:collapse;'>
               <tr>
@@ -530,7 +677,7 @@ function generatePlan() {
                 <th style='text-align:left;background:#f0f4f8;'>Actual</th>
               </tr>
               ${modalExercises.map((e, idx) => {
-                const done = actuals[idx].sets && actuals[idx].reps && actuals[idx].weight;
+                const done = actualInputs[idx].sets && actualInputs[idx].reps && actualInputs[idx].weight;
                 return `
                   <tr${done ? " style='background:#e6faea;'" : ''}>
                     <td style='vertical-align:top;'>
@@ -538,14 +685,14 @@ function generatePlan() {
                       <div style='color:#888;font-size:0.95em;'>(${e['Type'] ? e['Type'] + ', ' : ''}${e['Muscle Group']})</div>
                     </td>
                     <td style='vertical-align:top;'>
-                      <div>Sets: <b>${document.querySelector(`[name=sets${idx}]`)?.value || ''}</b></div>
-                      <div>Reps: <b>${document.querySelector(`[name=reps${idx}]`)?.value || ''}</b></div>
-                      <div>Weight: <b>${document.querySelector(`[name=weight${idx}]`)?.value || ''} lbs</b></div>
+                      <div>Sets: <b>${targetInputs[idx].sets}</b></div>
+                      <div>Reps: <b>${targetInputs[idx].reps}</b></div>
+                      <div>Weight: <b>${targetInputs[idx].weight} lbs</b></div>
                     </td>
                     <td style='vertical-align:top;'>
-                      <input type='number' min='1' max='99' placeholder='Sets' style='width:48px;margin-bottom:2px;' value='${actuals[idx].sets}' data-idx='${idx}' class='actual-sets'>
-                      <input type='number' min='1' max='99' placeholder='Reps' style='width:48px;margin-bottom:2px;' value='${actuals[idx].reps}' data-idx='${idx}' class='actual-reps'>
-                      <input type='number' min='0' max='999' step='0.1' placeholder='Weight' style='width:60px;' value='${actuals[idx].weight}' data-idx='${idx}' class='actual-weight'>
+                      <input type='number' min='1' max='99' placeholder='Sets' style='width:48px;margin-bottom:2px;' value='${actualInputs[idx].sets}' data-idx='${idx}' class='actual-sets'>
+                      <input type='number' min='1' max='99' placeholder='Reps' style='width:48px;margin-bottom:2px;' value='${actualInputs[idx].reps}' data-idx='${idx}' class='actual-reps'>
+                      <input type='number' min='0' max='999' step='0.1' placeholder='Weight' style='width:60px;' value='${actualInputs[idx].weight}' data-idx='${idx}' class='actual-weight'>
                     </td>
                   </tr>
                 `;
@@ -557,6 +704,34 @@ function generatePlan() {
               <button id='finishWorkoutBtn' style='background:#2ecc40;color:#fff;padding:10px 18px;border:none;border-radius:5px;font-size:1em;font-weight:bold;'>Finish Workout</button>
             </div>
           `;
+          // Minimize bar logic
+          let minimizeBar = document.getElementById('jwMinimizeBar');
+          if (!minimizeBar) {
+            minimizeBar = document.createElement('div');
+            minimizeBar.id = 'jwMinimizeBar';
+            minimizeBar.style = 'position:fixed;bottom:0;left:0;width:100vw;z-index:3001;background:#223a5f;color:#fff;display:none;align-items:center;justify-content:space-between;padding:10px 24px;font-size:1.1em;box-shadow:0 -2px 12px #0003;';
+            minimizeBar.innerHTML = `
+              <div style='display:flex;align-items:center;gap:16px;'>
+                <span style='font-weight:bold;'>Workout In Progress</span>
+                <span id='minBarTimer' style='font-size:1.15em;'>⏱️ 00:00</span>
+              </div>
+              <button id='restoreWorkoutBtn' style='background:#2ecc40;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-weight:bold;font-size:1em;cursor:pointer;'>Restore</button>
+            `;
+            document.body.appendChild(minimizeBar);
+          }
+          // Minimize button handler
+          document.getElementById('minimizeWorkoutBtn').onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            minimizeBar.style.display = 'flex';
+            document.getElementById('minBarTimer').textContent = '⏱️ ' + formatTime(elapsed);
+          };
+          // Restore button handler
+          document.getElementById('restoreWorkoutBtn').onclick = function() {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            minimizeBar.style.display = 'none';
+          };
         }
 
         function updateTimer() {
@@ -564,32 +739,51 @@ function generatePlan() {
             elapsed = Date.now() - startTime;
             const timerEl = document.getElementById('workoutTimer');
             if (timerEl) timerEl.textContent = formatTime(elapsed);
+            // Update minimize bar timer if visible
+            const minBar = document.getElementById('jwMinimizeBar');
+            if (minBar && minBar.style.display !== 'none') {
+              const minBarTimer = document.getElementById('minBarTimer');
+              if (minBarTimer) minBarTimer.textContent = '⏱️ ' + formatTime(elapsed);
+            }
           }
         }
 
         function attachSessionHandlers() {
           // Actuals input handlers
           document.querySelectorAll('.actual-sets').forEach(inp => {
-            inp.oninput = function() {
+            inp.oninput = function(e) {
               const idx = +this.dataset.idx;
-              actuals[idx].sets = this.value;
-              renderSession();
+              actualInputs[idx].sets = this.value;
+              // Save focus info
+              renderSession({
+                className: 'actual-sets',
+                idx,
+                cursor: this.selectionStart
+              });
               attachSessionHandlers();
             };
           });
           document.querySelectorAll('.actual-reps').forEach(inp => {
-            inp.oninput = function() {
+            inp.oninput = function(e) {
               const idx = +this.dataset.idx;
-              actuals[idx].reps = this.value;
-              renderSession();
+              actualInputs[idx].reps = this.value;
+              renderSession({
+                className: 'actual-reps',
+                idx,
+                cursor: this.selectionStart
+              });
               attachSessionHandlers();
             };
           });
           document.querySelectorAll('.actual-weight').forEach(inp => {
-            inp.oninput = function() {
+            inp.oninput = function(e) {
               const idx = +this.dataset.idx;
-              actuals[idx].weight = this.value;
-              renderSession();
+              actualInputs[idx].weight = this.value;
+              renderSession({
+                className: 'actual-weight',
+                idx,
+                cursor: this.selectionStart
+              });
               attachSessionHandlers();
             };
           });
@@ -598,6 +792,8 @@ function generatePlan() {
             clearInterval(timerInterval);
             modal.style.display = 'none';
             document.body.style.overflow = '';
+            const minBar = document.getElementById('jwMinimizeBar');
+            if (minBar) minBar.style.display = 'none';
           };
           // Pause/Resume Workout
           document.getElementById('pauseWorkoutBtn').onclick = function() {
@@ -615,15 +811,18 @@ function generatePlan() {
           // Finish Workout
           document.getElementById('finishWorkoutBtn').onclick = function() {
             clearInterval(timerInterval);
+            // Hide minimize bar if visible
+            const minBar = document.getElementById('jwMinimizeBar');
+            if (minBar) minBar.style.display = 'none';
             // Calculate summary
             const totalTime = formatTime(elapsed);
             const numExercises = modalExercises.length;
             let totalSets = 0, totalReps = 0;
             // For each exercise, get max weight (from actuals)
             const exerciseSummaries = modalExercises.map((e, idx) => {
-              const sets = parseInt(actuals[idx].sets) || 0;
-              const reps = parseInt(actuals[idx].reps) || 0;
-              const weight = parseFloat(actuals[idx].weight) || 0;
+              const sets = parseInt(actualInputs[idx].sets) || 0;
+              const reps = parseInt(actualInputs[idx].reps) || 0;
+              const weight = parseFloat(actualInputs[idx].weight) || 0;
               totalSets += sets;
               totalReps += reps;
               return {
@@ -633,8 +832,15 @@ function generatePlan() {
                 weight
               };
             });
-            // Save workout to history
-            saveUserHistory({
+            // Assign unique sessionId per user
+            let username = currentUser || localStorage.getItem('jw_currentUser') || 'Guest';
+            let nextSessionIdKey = 'jw_nextSessionId_' + username;
+            let nextSessionId = parseInt(localStorage.getItem(nextSessionIdKey) || '1', 10);
+            // Save workout to history in localStorage (per user)
+            let userHistoryKey = 'jw_history_' + username;
+            let workoutHistory = JSON.parse(localStorage.getItem(userHistoryKey) || '[]');
+            const workoutObj = {
+              sessionId: nextSessionId,
               date: Date.now(),
               totalTime,
               totalSets,
@@ -643,14 +849,17 @@ function generatePlan() {
                 name: e.Exercise,
                 type: e.Type || '',
                 muscle: e['Muscle Group'] || e['Muscle'] || '',
-                targetSets: document.querySelector(`[name=sets${idx}]`)?.value || '',
-                targetReps: document.querySelector(`[name=reps${idx}]`)?.value || '',
-                targetWeight: document.querySelector(`[name=weight${idx}]`)?.value || '',
-                actualSets: actuals[idx].sets,
-                actualReps: actuals[idx].reps,
-                actualWeight: actuals[idx].weight
+                targetSets: targetInputs[idx].sets,
+                targetReps: targetInputs[idx].reps,
+                targetWeight: targetInputs[idx].weight,
+                actualSets: actualInputs[idx].sets,
+                actualReps: actualInputs[idx].reps,
+                actualWeight: actualInputs[idx].weight
               }))
-            });
+            };
+            workoutHistory.push(workoutObj);
+            localStorage.setItem(userHistoryKey, JSON.stringify(workoutHistory));
+            localStorage.setItem(nextSessionIdKey, (nextSessionId + 1).toString());
             // Show summary page in modal
             document.getElementById('modalPlanContent').innerHTML = `
               <h3 style='margin-top:0;'>Workout Summary</h3>
@@ -690,6 +899,29 @@ function generatePlan() {
         renderSession();
         attachSessionHandlers();
         timerInterval = setInterval(updateTimer, 1000);
+
+        // Focus restoration after re-render
+        function restoreFocus(focusInfo) {
+          if (!focusInfo) return;
+          const { className, idx, cursor } = focusInfo;
+          const inputs = document.getElementsByClassName(className);
+          for (let i = 0; i < inputs.length; ++i) {
+            if (+inputs[i].dataset.idx === idx) {
+              inputs[i].focus();
+              if (typeof cursor === 'number') {
+                inputs[i].setSelectionRange(cursor, cursor);
+              }
+              break;
+            }
+          }
+        }
+
+        // Patch renderSession to accept focusInfo
+        const origRenderSession = renderSession;
+        renderSession = function(focusInfo) {
+          origRenderSession(focusInfo);
+          restoreFocus(focusInfo);
+        };
       };
     };
     // Add close button handler
