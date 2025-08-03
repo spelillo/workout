@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout History</title>
+    <link rel="stylesheet" href="jwstyle.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { text-align: center; color: #2d3a4b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f0f4f8; }
+        .metrics { margin-bottom: 24px; }
+        .back-btn { background: #2d3a4b; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; font-size: 1em; cursor: pointer; margin-bottom: 18px; }
+    </style>
+</head>
+<body> <!-- User Header -->
+    <div class="container">
+       <!--<button class="back-btn" onclick="backToWorkout()">&larr; Back to Workout</button>-->
+        <h1 id="historyHeader">Workout History</h1>
+        <div class="metrics" id="metrics"></div>
+        <div id="historyTableDiv"></div>
+        <div id="sessionDetailDiv" style="display:none;"></div>
+    </div>
+    <script>
+    function backToWorkout() {
+      if (localStorage.getItem('jw_currentUser')) {
+        localStorage.setItem('jw_skipLoginOnce', '1');
+        window.location.href = 'index.html';
+      } else {
+        window.location.href = 'index.html'; // fallback, will show login
+      }
+    }
+    let currentUser = localStorage.getItem('jw_currentUser') || null;
+    if (!currentUser) {
+      document.querySelector('.container').innerHTML = '<h2 style="color:#e74c3c;">Not logged in.</h2>';
+    } else {
+      document.getElementById('historyHeader').textContent = `Workouts for '${currentUser}'`;
+      const history = JSON.parse(localStorage.getItem('jw_history_' + currentUser) || '[]');
+      // Calculate total workouts and total time
+      let totalWorkouts = history.length;
+      let totalMs = 0;
+      history.forEach(w => {
+        if (w.totalTime) {
+          let parts = w.totalTime.split(':').map(Number);
+          let ms = 0;
+          if (parts.length === 2) {
+            ms = (parts[0] * 60 + parts[1]) * 1000;
+          } else if (parts.length === 3) {
+            ms = (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000;
+          }
+          totalMs += ms;
+        }
+      });
+      function formatDuration(ms) {
+        let sec = Math.floor(ms / 1000);
+        let days = Math.floor(sec / 86400);
+        sec = sec % 86400;
+        let hours = Math.floor(sec / 3600);
+        sec = sec % 3600;
+        let min = Math.floor(sec / 60);
+        sec = sec % 60;
+        let out = [];
+        if (days) out.push(days + 'd');
+        if (hours) out.push(hours + 'h');
+        if (min) out.push(min + 'm');
+        out.push(sec + 's');
+        return out.join(' ');
+      }
+      document.getElementById('metrics').innerHTML = `<b>Total Workouts:</b> ${totalWorkouts} &nbsp; | &nbsp; <b>Total Time Spent:</b> ${formatDuration(totalMs)}`;
+      // Table of sessions
+      if (!history.length) {
+        document.getElementById('historyTableDiv').innerHTML = '<b>No workout history found.</b>';
+      } else {
+        let table = `<table><tr><th>Session ID</th><th>Date</th><th>Time</th><th>Details</th><th>Delete</th></tr>`;
+        // Sort by sessionId ascending
+        history.sort((a, b) => a.sessionId - b.sessionId);
+        history.forEach(w => {
+          const date = w.date ? new Date(w.date) : null;
+          const dateStr = date ? date.toLocaleDateString() : '-';
+          const timeStr = date ? date.toLocaleTimeString() : '-';
+          table += `<tr>
+            <td><a href="#" class="view-session-link" data-sessionid="${w.sessionId}" style="color:#2980b9;text-decoration:underline;">${w.sessionId}</a></td>
+            <td>${dateStr}</td>
+            <td>${timeStr}</td>
+            <td><a href="#" class="view-session-link" data-sessionid="${w.sessionId}">View Details</a></td>
+            <td><button class="delete-session-btn" data-sessionid="${w.sessionId}" title="Delete Workout" style="background:none;border:none;cursor:pointer;font-size:1.2em;color:#e74c3c;" aria-label="Delete"><span style="pointer-events:none;">🗑️</span></button></td>
+          </tr>`;
+        });
+        table += '</table>';
+        document.getElementById('historyTableDiv').innerHTML = table;
+        // Add click handlers for details (both sessionId and View Details)
+        document.querySelectorAll('.view-session-link').forEach(link => {
+          link.onclick = function(e) {
+            e.preventDefault();
+            const sessionId = parseInt(this.getAttribute('data-sessionid'), 10);
+            const session = history.find(w => w.sessionId === sessionId);
+            if (session) showSessionDetail(session);
+          };
+        });
+        // Add click handlers for delete buttons
+        document.querySelectorAll('.delete-session-btn').forEach(btn => {
+          btn.onclick = function(e) {
+            e.preventDefault();
+            const sessionId = parseInt(this.getAttribute('data-sessionid'), 10);
+            if (confirm('Are you sure you want to delete this workout session? This action cannot be undone.')) {
+              // Remove from localStorage
+              let userKey = 'jw_history_' + currentUser;
+              let userHistory = JSON.parse(localStorage.getItem(userKey) || '[]');
+              userHistory = userHistory.filter(w => w.sessionId !== sessionId);
+              localStorage.setItem(userKey, JSON.stringify(userHistory));
+              // Re-render table
+              location.reload();
+            }
+          };
+        });
+      }
+      // Hide detail div initially
+      document.getElementById('sessionDetailDiv').style.display = 'none';
+    }
+
+    function showSessionDetail(session) {
+      const div = document.getElementById('sessionDetailDiv');
+      div.style.display = '';
+      document.getElementById('historyTableDiv').style.display = 'none';
+      document.getElementById('metrics').style.display = 'none';
+      // Helper to display value or '-'
+      function showVal(val, isWeight = false) {
+        if (val === undefined || val === null || val === '') return '-';
+        return isWeight ? (val + ' lbs') : val;
+      }
+      div.innerHTML = `
+        <button class="back-btn" id="backToListBtn">&larr; Back to List</button>
+        <h2>Session #${session.sessionId} Details</h2>
+        <div style='font-size:1.05em;margin-bottom:10px;'><b>Date:</b> ${session.date ? new Date(session.date).toLocaleString() : 'Unknown'}</div>
+        <table style='width:100%;border-collapse:collapse;margin-bottom:18px;'>
+          <tr>
+            <th style='text-align:left;background:#f0f4f8;'>Exercise</th>
+            <th style='text-align:left;background:#f0f4f8;'>Sets (Target/Actual)</th>
+            <th style='text-align:left;background:#f0f4f8;'>Reps (Target/Actual)</th>
+            <th style='text-align:left;background:#f0f4f8;'>Weight (Target/Actual)</th>
+          </tr>
+          ${session.exercises.map(e => {
+            // Try both camelCase and lowercase property names for compatibility
+            const tSets = e.targetSets ?? e.TargetSets ?? e.sets ?? e.Sets ?? '';
+            const aSets = e.actualSets ?? e.ActualSets ?? e.actualsets ?? '';
+            const tReps = e.targetReps ?? e.TargetReps ?? e.reps ?? e.Reps ?? '';
+            const aReps = e.actualReps ?? e.ActualReps ?? e.actualreps ?? '';
+            const tWeightRaw = e.targetWeight ?? e.TargetWeight ?? e.weight ?? e.Weight ?? '';
+            const aWeightRaw = e.actualWeight ?? e.ActualWeight ?? e.actualweight ?? '';
+            const tWeight = showVal(tWeightRaw, true);
+            const aWeight = showVal(aWeightRaw, true);
+            return `<tr>
+              <td>${e.name ?? e.Exercise ?? '-'}</td>
+              <td>${showVal(tSets)} / ${showVal(aSets)}</td>
+              <td>${showVal(tReps)} / ${showVal(aReps)}</td>
+              <td>${tWeight} / ${aWeight}</td>
+            </tr>`;
+          }).join('')}
+        </table>
+      `;
+      document.getElementById('backToListBtn').onclick = function() {
+        div.style.display = 'none';
+        document.getElementById('historyTableDiv').style.display = '';
+        document.getElementById('metrics').style.display = '';
+      };
+    }
+    </script>
+</body>
+</html>
