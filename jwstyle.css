@@ -1,3 +1,340 @@
+/* Responsive: Stack modal table columns and sub-rows on mobile */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+/* Responsive: Stack modal table columns and sub-rows on mobile */
+@media (max-width: 700px) {
+  .jw-modal-table,
+  .jw-modal-table tbody,
+  .jw-modal-table tr,
+  .jw-modal-table td,
+  .jw-modal-table th {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  .jw-modal-table tr {
+    margin-bottom: 18px;
+    border-bottom: 2px solid #223a5f;
+    background: #23273a !important;
+  }
+  .jw-modal-table th {
+    text-align: left !important;
+    background: #223a5f !important;
+    color: #fff !important;
+    padding: 10px 8px 4px 8px !important;
+    font-size: 1em;
+    border: none;
+  }
+  .jw-modal-table td {
+    padding: 10px 0 10px 0 !important;
+    border: none !important;
+    background: #23273a !important;
+    color: #f7f7f7 !important;
+    font-size: 1em;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .jw-modal-table .set-row td {
+    padding-left: 18px !important;
+    font-size: 1em;
+    background: #23273a !important;
+    color: #f7f7f7 !important;
+    border: none !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .jw-modal-table .set-row input[type=number],
+  .jw-modal-table .set-row input[type=text] {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 6px 0 10px 0 !important;
+    font-size: 1em;
+    box-sizing: border-box;
+    border-radius: 6px;
+    background: #181b23 !important;
+    color: #f7f7f7 !important;
+    border: 1px solid #223a5f !important;
+    padding: 10px;
+  }
+  .expand-arrow {
+    font-size: 1.3em !important;
+    margin-right: 8px !important;
+  }
+}
+
+/* Make per-set input fields full width and more touch-friendly on mobile */
+@media (max-width: 700px) {
+  .jw-modal-table input[type=number],
+  .jw-modal-table input[type=text] {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 1em;
+    margin: 4px 0 8px 0 !important;
+    box-sizing: border-box;
+  }
+}
+.circle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  font-weight: bold;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.close-btn {
+  background: #e74c3c !important;
+  color: #fff !important;
+}
+.close-btn:hover {
+  background: #c0392b !important;
+}
+.min-btn {
+  background: #f1c40f !important;
+  color: #23273a !important;
+}
+.min-btn:hover {
+  background: #f7d774 !important;
+  color: #23273a !important;
+}
+
+/* Workout set table styling */
+/* Responsive workout set table */
+.workout-set-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  background: #23273a;
+  table-layout: fixed;
+  word-break: break-word;
+  overflow-x: auto;
+  min-width: 350px;
+  box-sizing: border-box;
+}
+.workout-set-table th, .workout-set-table td {
+  border: 1px solid #223a5f;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 1em;
+  overflow: hidden;
+}
+/* Hide number input spinners for custom inc/dec arrows */
+input[type=number].actual-reps::-webkit-inner-spin-button,
+input[type=number].actual-reps::-webkit-outer-spin-button,
+input[type=number].actual-weight::-webkit-inner-spin-button,
+input[type=number].actual-weight::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number].actual-reps,
+input[type=number].actual-weight {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.workout-set-table th {
+  background: #223a5f;
+  color: #fff;
+  font-weight: 600;
+}
+.workout-set-table td {
+  background: #23273a;
+  color: #f7f7f7;
+}
+.workout-ex-block {
+  margin-bottom: 18px;
+}
+.jw-modal-action-btn {
+  background: #223a5f !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1em;
+  padding: 10px 18px;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+.jw-modal-action-btn:hover {
+  background: #2ecc40 !important;
+  color: #181b23 !important;
+}
+
+
+body, html {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #181b23;
+  color: #f7f7f7;
+}
+
+/* Main container: dark blue, soft corners, shadow */
+.container {
+  background: #23273a !important;
+  color: #f7f7f7 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 32px #0006 !important;
+}
+
+/* Headings: bold, white, modern */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', Arial, sans-serif;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+label {
+  color: #b8c6e0;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* Table styling: dark rows, blue headers */
+table {
+  background: #23273a;
+  color: #f7f7f7;
+}
+th {
+  background: #223a5f !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+td {
+  background: #23273a !important;
+  color: #f7f7f7 !important;
+}
+
+.table-responsive {
+  background: transparent;
+}
+
+/* Buttons: navy with green accent on hover */
+/* Remove (delete) button: hover red */
+.jw-modal-table button.delete-btn:hover {
+  background: #e74c3c !important;
+  color: #fff !important;
+}
+button, .jw-add-btn, .jw-modal-table button, .jw-modal-table button.reload-btn, .jw-modal-table button.delete-btn, .back-btn {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #223a5f !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.2s, color 0.2s;
+}
+button:hover, .jw-add-btn:hover, .jw-modal-table button:hover, .back-btn:hover {
+  background: #2ecc40 !important;
+  color: #181b23 !important;
+}
+
+/* Increment/Decrement controls for workout modal */
+.inc-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.inc-stack {
+  display: flex;
+  flex-direction: column;
+  margin-left: 2px;
+}
+.inc-btn {
+  width: 22px;
+  height: 18px;
+  padding: 0;
+  font-size: 1em;
+  background: #223a5f !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+  transition: background 0.2s, color 0.2s;
+  z-index: 1;
+}
+.inc-btn.inc-up {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.inc-btn.inc-down {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.inc-btn:hover {
+  background: #2ecc40 !important;
+  color: #181b23 !important;
+}
+
+/* Green accent for important actions */
+.jw-add-btn {
+  background: #2ecc40 !important;
+  color: #181b23 !important;
+}
+.jw-add-btn:hover {
+  background: #219a32 !important;
+  color: #fff !important;
+}
+
+/* Plan box: slightly lighter dark */
+.plan {
+  background: #23273a !important;
+  color: #f7f7f7 !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0004;
+}
+
+/* Metrics and links */
+.metrics {
+  color: #b8c6e0 !important;
+}
+a, a:visited {
+  color: #2ecc40;
+  text-decoration: underline;
+}
+a:hover {
+  color: #fff;
+  background: #2ecc40;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+/* Modal backgrounds */
+#planModal, #loginModal {
+  background: rgba(24,27,35,0.92) !important;
+}
+
+/* Remove white backgrounds from modal inners */
+#planModalInner, #loginModal > div {
+  background: #23273a !important;
+  color: #f7f7f7 !important;
+}
+
+/* Inputs: dark, blue border */
+input, select {
+  background: #181b23 !important;
+  color: #f7f7f7 !important;
+  border: 1px solid #223a5f !important;
+  border-radius: 6px;
+  padding: 10px;
+}
+input:focus, select:focus {
+  outline: 2px solid #2ecc40 !important;
+}
 /* Responsive modal: make modal content scrollable on mobile */
 @media (max-width: 600px) {
   #planModal > div {
